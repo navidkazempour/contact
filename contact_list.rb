@@ -42,7 +42,11 @@ class ContactList
     puts "ID please:"
     id = STDIN.gets.chomp
     contact = Contact.find(id)
-    puts "#{contact.id}: #{contact.name}, #{contact.email}"
+    if contact
+      puts "#{contact.id}: #{contact.name}, #{contact.email}"
+    else
+      puts "No result for this ID, sorry."
+    end
   end
 
   def search
