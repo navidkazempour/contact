@@ -1,8 +1,8 @@
-require_relative 'contact'
+require_relative 'setup'
 
 class ContactList
 
-  def prompt
+  def self.prompt
     puts "Here is a list of available commands:"
     puts "\tnew\t- Create a new contact"
     puts "\tlist\t- List all contacts"
@@ -28,23 +28,23 @@ class ContactList
     end 
   end
 
-  def delete
+  def self.delete
     id = ARGV[1]
-    find_by_id
+    @contact = Contact.find(id)
     puts "Are you sure you want to delete?"
     ans = STDIN.gets.chomp
 
     case ans
     when "yes"
-      Contact.destroy(id)
+      @contact.destroy
     else
       0
     end
   end
 
-  def update
-    puts "Matches found:"
-    found = find_by_id
+  def self.update
+    id = ARGV[1]
+    @contact = Contact.find(id)
     puts "What do you gonna modify on this contact?"
     puts "\tname\n\temail"
     ans = STDIN.gets.chomp
@@ -53,12 +53,12 @@ class ContactList
     when "name"
       puts "New name please:"
       n_name = STDIN.gets.chomp
-      Contact.connection.exec_params("UPDATE contacts SET name = $1 WHERE id = #{@id}", [n_name])
+      @contact.update(name: "#{n_name}")
       puts "Changes made."
     when "email"
       puts "New email please:"
       n_email = STDIN.gets.chomp
-      Contact.connection.exec_params("UPDATE contacts SET email = $1 WHERE id = #{@id}", [n_email])
+      @contact.update(email: "#{n_email}")
       puts "Changes made."
     else
       puts "Wrong input!"
@@ -67,40 +67,34 @@ class ContactList
     
   end
 
-  def create_contact
+  def self.create_contact
     puts "Name:"  
     name = STDIN.gets.chomp
     puts "e-mail:"
     email = STDIN.gets.chomp
-    contact = Contact.create(name,email)
+    contact = Contact.create(name: name,email: email)
     puts "Contact #{name} with #{email} email created."
   end
 
-  def print_contacts
+  def self.print_contacts
     contacts = Contact.all
     contacts.each do |contact|
       puts "#{contact.id}: #{contact.name}, #{contact.email}"
     end
   end
 
-  def find_by_id
+  def self.find_by_id
     id = ARGV[1]
     contact = Contact.find(id)
     if contact
-      contact.each{|i| @found = Contact.new(i["id"], i["name"], i["email"])}
-      if @found
-        puts "#{@found.id}: #{@found.name}, #{@found.email}"
-        @id = @found.id
-      else
-        puts "NO MATCH!"
-      end
+        puts "#{contact.id}: #{contact.name}, #{contact.email}"
     else
       puts "No result for this ID, sorry."
       nil
     end
   end
 
-  def search
+  def self.search
     puts "Enter clue:"
     term = STDIN.gets.chomp
     results = Contact.search(term)
@@ -115,5 +109,4 @@ class ContactList
 
 end
 
-contact = ContactList.new
-contact.prompt
+ContactList.prompt
